@@ -6,7 +6,7 @@ const userContoller = require('../controllers/user');
  router.post('/user', userContoller.signup);
  router.post('/login', userContoller.login);
 
- router.post('/login', userContoller.login);
+
 
 
 
