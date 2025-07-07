@@ -3,7 +3,7 @@ const usermodel = require("../modules/usermodel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const JWT_SECRET = "the secret key";
+const JWT_SECRET = "ommeghani";
 exports.signup = async (req, res) => {
   try {
     const { email, username, password } = req.body;
@@ -70,7 +70,7 @@ exports.login = async (req, res) => {
       .update(loginuser.email.toString())
       .digest("hex");
 
-    const token = jwt.sign({ id: hashedId, email: emailId }, JWT_SECRET, {
+    const token = jwt.sign({ id: loginuser._id, email: loginuser.email }, JWT_SECRET, {
       expiresIn: "1d",
     });
     res.status(200).json({ token });
