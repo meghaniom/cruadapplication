@@ -10,4 +10,4 @@ const dbConnect = async () => {
     console.log(error);
   }
 };
- module.exports = dbConnect;
+module.exports = dbConnect;
