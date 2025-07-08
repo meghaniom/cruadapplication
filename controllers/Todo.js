@@ -1,17 +1,19 @@
 const Todo = require("../modules/todomodel");
 
 exports.createTodo = async (req, res) => {
-  const { taskname } = req.body;
-  const userId = req.user._id;
-
-  if (!taskname || taskname.trim() === "") {
-    return res.status(400).json({ message: "Please add a valid task name." });
-  }
-
   try {
+    const { taskname } = req.body;
+    const userId = req.user._id;
+    
+
+    if (!taskname || taskname.trim() === "") {
+      return res.status(400).json({ message: "Please add a valid task name." });
+    }
     const trimmedTask = taskname.trim();
 
     const existingTask = await Todo.findOne({ taskname: trimmedTask, userId });
+    console.log("existing Task", existingTask);
+
     if (existingTask) {
       return res.status(409).json({ message: "Task already exists." });
     }
@@ -30,28 +32,32 @@ exports.createTodo = async (req, res) => {
 
 exports.updateTodo = async (req, res) => {
   try {
-    const todo = await Todo.findOneAndUpdate({
-      userId : req.user._id,
-      new : true
-    })
+    const updateData = req.body;
 
-  
+    const todo = await Todo.findOneAndUpdate(
+      { userId: req.user._id },
+      updateData,               
+      { new: true }            
+    );
 
     if (!todo) {
-      return res
-        .status(404)
-        .json({ message: "Todo not found or unauthorized." });
+      return res.status(404).json({ message: "Todo not found or unauthorized." });
     }
 
     return res.status(200).json({ message: "Todo updated successfully", todo });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
+
+
 exports.readTodo = async (req, res) => {
   try {
+    
     const todos = await Todo.find({ userId: req.user._id });
+
     res.status(200).json({ message: "Fetched todos", todos });
   } catch (error) {
     res
@@ -80,21 +86,24 @@ exports.singleTodo = async (req, res) => {
   }
 };
 
-
 exports.deleteTodo = async (req, res) => {
   try {
+    
+
     const todo = await Todo.findOneAndDelete({
-      userId: req.user._id,
+      
+      userId: req.user._id, 
     });
+
     if (!todo) {
       return res
         .status(404)
         .json({ message: "Todo not found or unauthorized." });
     }
+
     res.status(200).json({ message: "Todo deleted successfully", todo });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error deleting todo", error: error.message });
+    res.status(500).json({ message: "Error deleting todo", error: error.message });
   }
 };
+
