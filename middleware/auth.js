@@ -2,7 +2,8 @@ const jwt = require("jsonwebtoken");
 const JWT_SECRET = "ommeghani";
 
 const authMiddleWare = (req, res, next) => {
-    debugger
+   
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
