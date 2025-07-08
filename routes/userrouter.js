@@ -7,7 +7,4 @@ const userContoller = require('../controllers/user');
  router.post('/login', userContoller.login);
 
 
-
-
-
   module.exports = router;

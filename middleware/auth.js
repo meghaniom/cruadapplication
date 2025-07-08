@@ -1,9 +1,8 @@
 const jwt = require("jsonwebtoken");
+const User = require("../modules/usermodel")
 const JWT_SECRET = "ommeghani";
 
-const authMiddleWare = (req, res, next) => {
-   
-
+const authMiddleWare = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -13,12 +12,18 @@ const authMiddleWare = (req, res, next) => {
   const token = authHeader.split(" ")[1];
 
   try {
-    const decode = jwt.verify(token, JWT_SECRET);
-    req.user = decode;
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(decoded.id || decoded._id);
+
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized: User not found" });
+    }
+
+    req.user = user; 
     next();
   } catch (error) {
     return res.status(401).json({ message: "Unauthorized: Invalid or expired token" });
-  }
+  } 
 };
 
 module.exports = authMiddleWare;
