@@ -1,22 +1,14 @@
-const Todo = require("../modules/todomodel");
+const Todo = require("../modules/todoModel");
 
 exports.createTodo = async (req, res) => {
   try {
     const { taskname } = req.body;
     const userId = req.user._id;
-    
 
     if (!taskname || taskname.trim() === "") {
       return res.status(400).json({ message: "Please add a valid task name." });
     }
     const trimmedTask = taskname.trim();
-
-    const existingTask = await Todo.findOne({ taskname: trimmedTask, userId });
-    console.log("existing Task", existingTask);
-
-    if (existingTask) {
-      return res.status(409).json({ message: "Task already exists." });
-    }
 
     const newTask = new Todo({ taskname: trimmedTask, userId });
     await newTask.save();
@@ -32,43 +24,57 @@ exports.createTodo = async (req, res) => {
 
 exports.updateTodo = async (req, res) => {
   try {
-    const updateData = req.body;
-
+    const updateData = {
+      ...req.body,
+      status: true,
+    };
     const todo = await Todo.findOneAndUpdate(
       { userId: req.user._id },
-      updateData,               
-      { new: true }            
+      updateData,
+      { new: true }
     );
 
     if (!todo) {
-      return res.status(404).json({ message: "Todo not found or unauthorized." });
-    }
+      return res
+        .status(404)
+        .json({ message: "Todo not found or unauthorized." });
+    };
 
-    return res.status(200).json({ message: "Todo updated successfully", todo });
+    return res.status(200).json({
+      success: true,
+      message: "Todo updated successfully",
+      todo,
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
-
-
 exports.readTodo = async (req, res) => {
   try {
-    
     const todos = await Todo.find({ userId: req.user._id });
-
-    res.status(200).json({ message: "Fetched todos", todos });
+    res.status(200).json({
+      success: true,
+      todos,
+      message: "Fetched todos successfully",
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching todos", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching todos",
+      error: error.message,
+    });
   }
 };
 
 exports.singleTodo = async (req, res) => {
   try {
     const todo = await Todo.findOne({
+      _id: req.params.id,
       userId: req.user._id,
     });
 
@@ -76,7 +82,7 @@ exports.singleTodo = async (req, res) => {
       return res
         .status(404)
         .json({ message: "Todo not found or unauthorized." });
-    }
+    };
 
     res.status(200).json({ message: "Single todo fetched", todo });
   } catch (error) {
@@ -88,11 +94,8 @@ exports.singleTodo = async (req, res) => {
 
 exports.deleteTodo = async (req, res) => {
   try {
-    
-
     const todo = await Todo.findOneAndDelete({
-      
-      userId: req.user._id, 
+      userId: req.user._id,
     });
 
     if (!todo) {
@@ -100,10 +103,16 @@ exports.deleteTodo = async (req, res) => {
         .status(404)
         .json({ message: "Todo not found or unauthorized." });
     }
-
-    res.status(200).json({ message: "Todo deleted successfully", todo });
+    res.status(200).json({
+      success: true,
+      message: "Todo deleted successfully",
+      todo,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting todo", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Error deleting todo",
+      error: error.message,
+    });
   }
 };
-

@@ -1,13 +1,12 @@
 
-const usermodel = require("../modules/usermodel");
+const usermodel = require("../modules/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
+const tokenBlacklist = require("./tokenBlacklist");
 const JWT_SECRET = "ommeghani";
 exports.signup = async (req, res) => {
   try {
     const { email, username, password } = req.body;
-
     if (!email || !password || !username) {
       return res.status(400).json({ message: "All fields are required." });
     }
@@ -43,8 +42,7 @@ exports.signup = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-};
-
+}; 
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -61,15 +59,7 @@ exports.login = async (req, res) => {
     if (!isPassword) {
       return res.status(400).json({ message: "Invalid password" });
     }
-    const hashedId = crypto
-      .createHash("sha256")
-      .update(loginuser._id.toString())
-      .digest("hex");
-    const emailId = crypto
-      .createHash("sha256")
-      .update(loginuser.email.toString())
-      .digest("hex");
-
+ 
     const token = jwt.sign({ id: loginuser._id, email: loginuser.email }, JWT_SECRET, {
       expiresIn: "1d",
     });
@@ -79,4 +69,25 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
+exports.logout = async(req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader) {
+      return res.status(400).json({message  : "Authorization header is missing."});
+  }
+      const parts = authHeader.trim().split(/\s+/);
+ const token = parts.length === 2 && parts[0] === "Bearer" ? parts[1] : null;
+    
+       if (!token) {
+        return res.status(400).json({message : "Token not provided"});
+       }
+        tokenBlacklist.add(token);
+        res.status(200).json({ message : "Logout successfully"});
+  
+  }
+  catch (error) {
+    console.log(error);
+    res.status(500).json({ message  : "Internal server error"});
+  }
+}
