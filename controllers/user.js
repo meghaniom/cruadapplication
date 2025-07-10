@@ -1,13 +1,13 @@
 
-const usermodel = require("../modules/userModel");
+const usermodel = require("../modules/usermodel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const tokenBlacklist = require("./tokenBlacklist");
 const JWT_SECRET = "ommeghani";
 exports.signup = async (req, res) => {
   try {
-    const { email, username, password } = req.body;
-    if (!email || !password || !username) {
+    const { email, username, password, role } = req.body;
+    if (!email || !password || !username || !role) {
       return res.status(400).json({ message: "All fields are required." });
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -24,6 +24,10 @@ exports.signup = async (req, res) => {
         .status(400)
         .json({ message: "Username must be at least 3 characters long." });
     }
+    const ValidRoles = ["user","admin"];
+    if (!ValidRoles.includes(role)) {
+      return res.status(400).json({message : "Invalid role. Must be'User ' or 'admin"})
+    }
     const user = await usermodel.findOne({ email });
 
     if (user) {
@@ -37,6 +41,7 @@ exports.signup = async (req, res) => {
       email,
       username,
       password: hashedPassword,
+      role
     });
     res.status(200).json({ message: "User created successfully." });
   } catch (error) {
@@ -60,10 +65,10 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
     }
  
-    const token = jwt.sign({ id: loginuser._id, email: loginuser.email }, JWT_SECRET, {
+    const token = jwt.sign({ id: loginuser._id, email: loginuser.email, role : loginuser.role }, JWT_SECRET, {
       expiresIn: "1d",
     });
-    res.status(200).json({ token });
+    res.status(200).json({message : "Login successful",token})
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

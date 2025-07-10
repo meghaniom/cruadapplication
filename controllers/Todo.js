@@ -1,4 +1,4 @@
-const Todo = require("../modules/todoModel");
+const Todo = require('../modules/todoModel')
 
 exports.createTodo = async (req, res) => {
   try {

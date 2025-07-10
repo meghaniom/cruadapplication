@@ -3,7 +3,8 @@ const dbConnect = require("./config/dbConnect");
 const cors = require("cors");
 
 const userRouter = require("./routes/userRouter");
-const TodoRouter = require("./routes/todoRouter");
+const TodoRouter = require("./routes/todorouter");
+const adminRouter =  require("./routes/adminTodoRoutes");
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use((err, req, res, next) => {
 
 app.use("/api/v1/auth", userRouter);
 app.use("/api/v1/todo", TodoRouter);
+app.use("/api/v1/admin", adminRouter);
 
 const PORT = 3000;
 app.listen(PORT, () => {
