@@ -1,9 +1,9 @@
-const Todo = require('../modules/todoModel')
+const Todo = require("../modules/todoModel");
 
 exports.createTodo = async (req, res) => {
   try {
-    const { taskname } = req.body;
     const userId = req.user._id;
+    const { taskname } = req.body;
 
     if (!taskname || taskname.trim() === "") {
       return res.status(400).json({ message: "Please add a valid task name." });
@@ -38,7 +38,7 @@ exports.updateTodo = async (req, res) => {
       return res
         .status(404)
         .json({ message: "Todo not found or unauthorized." });
-    };
+    }
 
     return res.status(200).json({
       success: true,
@@ -70,20 +70,17 @@ exports.readTodo = async (req, res) => {
     });
   }
 };
-
 exports.singleTodo = async (req, res) => {
   try {
     const todo = await Todo.findOne({
-      _id: req.params.id,
       userId: req.user._id,
     });
-
+    console.log("todo", todo);
     if (!todo) {
       return res
         .status(404)
         .json({ message: "Todo not found or unauthorized." });
-    };
-
+    }
     res.status(200).json({ message: "Single todo fetched", todo });
   } catch (error) {
     res
@@ -97,7 +94,6 @@ exports.deleteTodo = async (req, res) => {
     const todo = await Todo.findOneAndDelete({
       userId: req.user._id,
     });
-
     if (!todo) {
       return res
         .status(404)

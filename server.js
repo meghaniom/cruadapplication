@@ -4,7 +4,7 @@ const cors = require("cors");
 
 const userRouter = require("./routes/userRouter");
 const TodoRouter = require("./routes/todorouter");
-const adminRouter =  require("./routes/adminTodoRoutes");
+const adminRouter = require("./routes/adminTodoRoutes");
 
 const app = express();
 
@@ -21,13 +21,12 @@ app.use(
 
 app.use(express.json());
 
-app.use((err, req, res, next) => {
-  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
-    return res.status(400).json({ message: "Malformed JSON body" });
-  }
-  next();
-});
-
+// app.use((err, req, res, next) => {
+//   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+//     return res.status(400).json({ message: "Malformed JSON body" });
+//   }
+//   next();
+// });
 app.use("/api/v1/auth", userRouter);
 app.use("/api/v1/todo", TodoRouter);
 app.use("/api/v1/admin", adminRouter);

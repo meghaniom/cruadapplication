@@ -1,4 +1,3 @@
-
 const usermodel = require("../modules/usermodel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -33,21 +32,19 @@ exports.signup = async (req, res) => {
     if (user) {
       return res.status(400).json({ message: "User already exists." });
     }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await usermodel.create({
       email,
       username,
       password: hashedPassword,
-      role
+      role,
     });
+    await newUser.save();
     res.status(200).json({ message: "User created successfully." });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-}; 
+};
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -64,35 +61,37 @@ exports.login = async (req, res) => {
     if (!isPassword) {
       return res.status(400).json({ message: "Invalid password" });
     }
- 
-    const token = jwt.sign({ id: loginuser._id, email: loginuser.email, role : loginuser.role }, JWT_SECRET, {
-      expiresIn: "1d",
-    });
-    res.status(200).json({message : "Login successful",token})
+
+    const token = jwt.sign(
+      { id: loginuser._id, email: loginuser.email, role: loginuser.role },
+      JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
+    res.status(200).json({ message: "Login successful", token, role: loginuser.role });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-exports.logout = async(req, res) => {
+exports.logout = async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
-    
     if (!authHeader) {
-      return res.status(400).json({message  : "Authorization header is missing."});
-  }
-      const parts = authHeader.trim().split(/\s+/);
- const token = parts.length === 2 && parts[0] === "Bearer" ? parts[1] : null;
-    
-       if (!token) {
-        return res.status(400).json({message : "Token not provided"});
-       }
-        tokenBlacklist.add(token);
-        res.status(200).json({ message : "Logout successfully"});
-  
-  }
-  catch (error) {
+      return res
+        .status(400)
+        .json({ message: "Authorization header is missing." });
+    }
+    const parts = authHeader.trim().split(/\s+/);
+    const token = parts.length === 2 && parts[0] === "Bearer" ? parts[1] : null;
+    if (!token) {
+      return res.status(400).json({ message: "Token not provided" });
+    }
+    tokenBlacklist.add(token);
+    res.status(200).json({ message: "Logout successfully" });
+  } catch (error) {
     console.log(error);
-    res.status(500).json({ message  : "Internal server error"});
+    res.status(500).json({ message: "Internal server error" });
   }
-}
+};

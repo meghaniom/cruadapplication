@@ -17,3 +17,5 @@ router.post ('/admin/createtodo', authMiddleware, isAdmin, adminTodoContollers.c
 router.patch('/admin/updateTodo/:id', authMiddleWare, isAdmin, adminTodoContollers.updateTodoById);
 
 router.delete('/admin/todo/:id', authMiddleWare, isAdmin, adminTodoContollers.DeleteTodoById);  
+
+ module.exports = router;
